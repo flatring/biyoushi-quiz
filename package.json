@@ -1,6 +1,6 @@
 {
     "name": "biyoushi-quiz",
-    "version": "1.2.0",
+    "version": "1.2.1",
     "description": "美容師国家試験の過去問をクイズ形式で出題するWebアプリです。",
     "scripts": {
         "dev": "vite",
