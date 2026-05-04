@@ -23,8 +23,19 @@ async function init() {
     document.getElementById('version-label').textContent = `Ver.${pkg.version}`
     buildExamSelect()
     bindEvents()
+
+    const target = parseHash()
+    const round = target ? target.round : selectedRound
     showScreen('home')
-    await loadExam(selectedRound)
+    await loadExam(round)
+    if (target) {
+        startSingleQuestion(target.number)
+    }
+}
+
+function parseHash() {
+    const m = location.hash.match(/^#\/(\d+)\/(\d+)$/)
+    return m ? { round: parseInt(m[1]), number: parseInt(m[2]) } : null
 }
 
 function buildExamSelect() {
@@ -142,6 +153,7 @@ function updateHomeStats() {
 }
 
 function goHome() {
+    history.replaceState(null, '', location.pathname)
     showScreen('home')
     updateHomeStats()
 }
@@ -153,6 +165,24 @@ function setOrder(order) {
 }
 
 // ---------- Quiz ----------
+
+function startSingleQuestion(number) {
+    const q = allQuestions.find(q => q.number === number)
+    if (!q) {
+        alert(`問${number}が見つかりません`)
+        goHome()
+        return
+    }
+    quizQueue = [q]
+    currentIdx = 0
+    sessionCorrect = 0
+    sessionTotal = 0
+    answered = false
+    document.getElementById('quiz-content').style.display = 'block'
+    document.getElementById('finish-content').style.display = 'none'
+    showScreen('quiz')
+    renderQuestion()
+}
 
 function startQuiz(mode) {
     if (allQuestions.length === 0) {
@@ -199,7 +229,8 @@ function renderQuestion() {
     const q = quizQueue[currentIdx]
     const total = quizQueue.length
 
-    document.getElementById('progress-label').textContent = `問 ${q.number}`
+    history.replaceState(null, '', `#/${selectedRound}/${q.number}`)
+    document.getElementById('progress-label').textContent = `問${q.number}`
     document.getElementById('progress-fill').style.width = `${(currentIdx / total) * 100}%`
     document.getElementById('session-pct').textContent =
         sessionTotal > 0 ? `${pct(sessionCorrect, sessionTotal)}%` : ''
