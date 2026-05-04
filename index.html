@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>美容師国試クイズ｜第53回</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg: #f0f4f8;
+            --card: #ffffff;
+            --primary: #4f7af8;
+            --correct: #10b981;
+            --wrong: #ef4444;
+            --text: #1e293b;
+            --text-sub: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Yu Gothic', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        .screen { display: none; }
+        .screen.active { display: block; }
+
+        /* ===== HOME ===== */
+        #screen-home {
+            min-height: 100vh;
+            padding: 48px 20px 40px;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+        }
+        #screen-home.active { display: flex; }
+
+        .home-icon { font-size: 48px; margin-bottom: 8px; }
+
+        .home-title {
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            margin-bottom: 4px;
+        }
+
+        .home-subtitle {
+            font-size: 13px;
+            color: var(--text-sub);
+            margin-bottom: 32px;
+        }
+
+        .home-card {
+            background: var(--card);
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            padding: 24px 20px;
+            width: 100%;
+            max-width: 420px;
+        }
+
+        .home-stats {
+            text-align: center;
+            margin-bottom: 24px;
+            min-height: 64px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .stat-big {
+            font-size: 48px;
+            font-weight: 800;
+            color: var(--primary);
+            line-height: 1;
+        }
+
+        .stat-caption {
+            font-size: 13px;
+            color: var(--text-sub);
+            margin-top: 4px;
+        }
+
+        .stat-weak {
+            font-size: 13px;
+            color: var(--wrong);
+            margin-top: 6px;
+        }
+
+        /* ===== BUTTONS ===== */
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 15px 20px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.1s, opacity 0.15s;
+            text-align: center;
+        }
+
+        .btn + .btn { margin-top: 10px; }
+        .btn:active { transform: scale(0.97); opacity: 0.82; }
+
+        .btn-primary { background: var(--primary); color: #fff; }
+        .btn-secondary { background: #e8eef8; color: var(--primary); }
+        .btn-outline {
+            background: #fff;
+            color: var(--text-sub);
+            border: 1.5px solid var(--border);
+        }
+
+        /* ===== QUIZ ===== */
+        .quiz-header {
+            background: var(--card);
+            padding: 12px 16px 10px;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .quiz-header-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            font-size: 22px;
+            color: var(--text-sub);
+            cursor: pointer;
+            padding: 2px 6px;
+            line-height: 1;
+        }
+
+        .progress-label {
+            font-size: 14px;
+            color: var(--text-sub);
+            font-weight: 600;
+        }
+
+        .session-pct {
+            font-size: 14px;
+            color: var(--primary);
+            font-weight: 700;
+            min-width: 40px;
+            text-align: right;
+        }
+
+        .progress-track {
+            height: 4px;
+            background: var(--border);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary);
+            border-radius: 2px;
+            transition: width 0.35s ease;
+        }
+
+        .quiz-body { padding: 16px; }
+
+        .subject-tag {
+            display: inline-block;
+            background: #e8eef8;
+            color: var(--primary);
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 20px;
+            margin-bottom: 12px;
+            letter-spacing: 0.02em;
+        }
+
+        .question-card {
+            background: var(--card);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            padding: 20px;
+            margin-bottom: 14px;
+        }
+
+        .question-text {
+            font-size: 15px;
+            line-height: 1.75;
+            margin-bottom: 0;
+        }
+
+        .preamble {
+            background: #f8fafc;
+            border-left: 3px solid var(--border);
+            padding: 12px 14px;
+            border-radius: 0 8px 8px 0;
+            font-size: 13px;
+            line-height: 1.85;
+            margin-top: 14px;
+        }
+
+        .preamble p + p { margin-top: 6px; }
+
+        .choices-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .choice-btn {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--card);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 14px 16px;
+            font-size: 15px;
+            line-height: 1.5;
+            cursor: pointer;
+            text-align: left;
+            width: 100%;
+            transition: border-color 0.12s, background 0.12s;
+        }
+
+        .choice-btn:active:not(:disabled) { background: #f0f4ff; }
+
+        .choice-num {
+            min-width: 28px;
+            height: 28px;
+            background: var(--bg);
+            border-radius: 50%;
+            font-weight: 700;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: background 0.12s, color 0.12s;
+        }
+
+        .choice-btn.correct { border-color: var(--correct); background: #f0fdf4; }
+        .choice-btn.correct .choice-num { background: var(--correct); color: #fff; }
+
+        .choice-btn.wrong { border-color: var(--wrong); background: #fef2f2; }
+        .choice-btn.wrong .choice-num { background: var(--wrong); color: #fff; }
+
+        .result-banner {
+            display: none;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 16px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .result-banner.show { display: flex; }
+
+        .result-banner.correct {
+            background: #f0fdf4;
+            color: var(--correct);
+            border: 1.5px solid #a7f3d0;
+        }
+
+        .result-banner.wrong {
+            background: #fef2f2;
+            color: var(--wrong);
+            border: 1.5px solid #fecaca;
+        }
+
+        .result-icon { font-size: 20px; }
+
+        #next-btn { display: none; margin-bottom: 10px; }
+
+        /* ===== FINISH ===== */
+        #finish-content { display: none; padding: 16px; }
+
+        .finish-card {
+            background: var(--card);
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            padding: 36px 24px 28px;
+            text-align: center;
+        }
+
+        .finish-emoji { font-size: 56px; margin-bottom: 12px; }
+
+        .finish-score {
+            font-size: 64px;
+            font-weight: 800;
+            color: var(--primary);
+            line-height: 1;
+        }
+
+        .finish-detail {
+            font-size: 15px;
+            color: var(--text-sub);
+            margin: 8px 0 28px;
+        }
+
+        /* ===== DASHBOARD ===== */
+        .dash-header {
+            background: var(--card);
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .dash-title { font-size: 17px; font-weight: 700; }
+
+        .dash-body { padding: 16px; }
+
+        .dash-section { margin-bottom: 22px; }
+
+        .section-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-sub);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 10px;
+        }
+
+        .stat-card {
+            background: var(--card);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            padding: 18px 20px;
+            margin-bottom: 10px;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+        }
+
+        .stat-label { font-size: 14px; color: var(--text-sub); }
+        .stat-value { font-size: 16px; font-weight: 700; }
+
+        .acc-bar {
+            height: 6px;
+            background: var(--border);
+            border-radius: 3px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+
+        .acc-fill {
+            height: 100%;
+            border-radius: 3px;
+            background: var(--primary);
+        }
+
+        .sub-item {
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .sub-item:last-child { border-bottom: none; }
+
+        .wrong-item {
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .wrong-item:last-child { border-bottom: none; }
+
+        .wrong-meta {
+            font-size: 11px;
+            color: var(--text-sub);
+            margin-bottom: 3px;
+        }
+
+        .empty-note {
+            text-align: center;
+            color: var(--text-sub);
+            font-size: 14px;
+            padding: 8px 0;
+        }
+    </style>
+</head>
+<body>
+
+<!-- HOME SCREEN -->
+<div id="screen-home" class="screen">
+    <div class="home-icon">💇</div>
+    <h1 class="home-title">美容師国試クイズ</h1>
+    <p class="home-subtitle">第53回 過去問（54問）</p>
+
+    <div class="home-card">
+        <div class="home-stats" id="home-stats">
+            <span style="color:var(--text-sub);font-size:14px">読み込み中…</span>
+        </div>
+        <button class="btn btn-primary" onclick="startQuiz('all')">全問モード</button>
+        <button class="btn btn-secondary" onclick="startQuiz('weak')">苦手問題モード</button>
+        <button class="btn btn-outline" onclick="showDashboard()">ダッシュボード</button>
+    </div>
+</div>
+
+<!-- QUIZ SCREEN -->
+<div id="screen-quiz" class="screen">
+    <div class="quiz-header">
+        <div class="quiz-header-row">
+            <button class="back-btn" onclick="goHome()">←</button>
+            <span class="progress-label" id="progress-label"></span>
+            <span class="session-pct" id="session-pct"></span>
+        </div>
+        <div class="progress-track">
+            <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+        </div>
+    </div>
+
+    <div class="quiz-body">
+        <div id="quiz-content">
+            <div class="subject-tag" id="q-subject"></div>
+            <div class="question-card">
+                <p class="question-text" id="q-text"></p>
+                <div class="preamble" id="q-preamble" style="display:none"></div>
+            </div>
+            <div class="choices-list" id="q-choices"></div>
+            <div class="result-banner" id="result-banner">
+                <span class="result-icon" id="result-icon"></span>
+                <span id="result-msg"></span>
+            </div>
+            <button class="btn btn-primary" id="next-btn" onclick="nextQuestion()">次の問題へ →</button>
+        </div>
+
+        <div id="finish-content">
+            <div class="finish-card">
+                <div class="finish-emoji" id="finish-emoji"></div>
+                <div class="finish-score" id="finish-score"></div>
+                <div class="finish-detail" id="finish-detail"></div>
+                <button class="btn btn-primary" onclick="startQuiz('all')">もう一度（全問）</button>
+                <button class="btn btn-secondary" onclick="startQuiz('weak')">苦手問題のみ</button>
+                <button class="btn btn-outline" onclick="showDashboard()">ダッシュボード</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- DASHBOARD SCREEN -->
+<div id="screen-dashboard" class="screen">
+    <div class="dash-header">
+        <button class="back-btn" onclick="goHome()">←</button>
+        <h2 class="dash-title">ダッシュボード</h2>
+    </div>
+    <div class="dash-body" id="dash-body"></div>
+</div>
+
+<script>
+    const DATA_URL = 'https://flatring.github.io/biyoushi-quiz/data/questions-53.json';
+    const STORAGE_KEY = 'biyoushi_quiz_v1';
+
+    let allQuestions = [];
+    let quizQueue = [];
+    let currentIdx = 0;
+    let sessionCorrect = 0;
+    let sessionTotal = 0;
+    let answered = false;
+
+    // ---------- Bootstrap ----------
+
+    async function init() {
+        showScreen('home');
+        try {
+            const res = await fetch(DATA_URL);
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            const data = await res.json();
+            allQuestions = data.questions.filter(q => !q.hasImage);
+            updateHomeStats();
+        } catch {
+            document.getElementById('home-stats').innerHTML =
+                '<span style="color:var(--wrong);font-size:14px">データ読み込み失敗。<br>ネット接続を確認してください。</span>';
+        }
+    }
+
+    // ---------- Storage ----------
+
+    function loadStorage() {
+        try {
+            return JSON.parse(localStorage.getItem(STORAGE_KEY)) || { answers: {} };
+        } catch {
+            return { answers: {} };
+        }
+    }
+
+    function saveStorage(data) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }
+
+    // ---------- Utilities ----------
+
+    function parseBold(text) {
+        return text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    }
+
+    function shuffle(arr) {
+        const a = [...arr];
+        for (let i = a.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+    }
+
+    function showScreen(name) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById('screen-' + name).classList.add('active');
+    }
+
+    function pct(correct, total) {
+        return total > 0 ? Math.round(correct / total * 100) : null;
+    }
+
+    // ---------- Home ----------
+
+    function updateHomeStats() {
+        const storage = loadStorage();
+        const records = Object.values(storage.answers);
+        const el = document.getElementById('home-stats');
+
+        if (records.length === 0) {
+            el.innerHTML = '<span class="stat-caption">まだ回答記録がありません</span>';
+            return;
+        }
+
+        const totalAttempts = records.reduce((s, r) => s + r.attempts, 0);
+        const totalCorrect = records.reduce((s, r) => s + r.correct, 0);
+        const overall = pct(totalCorrect, totalAttempts);
+        const weakCount = records.filter(r => r.lastResult === 'wrong').length;
+
+        el.innerHTML = `
+            <span class="stat-big">${overall}%</span>
+            <span class="stat-caption">総正答率（${totalCorrect} / ${totalAttempts}）</span>
+            ${weakCount > 0 ? `<span class="stat-weak">苦手: ${weakCount}問</span>` : ''}
+        `;
+    }
+
+    function goHome() {
+        showScreen('home');
+        updateHomeStats();
+    }
+
+    // ---------- Quiz ----------
+
+    function startQuiz(mode) {
+        if (allQuestions.length === 0) {
+            alert('データを読み込み中です。しばらくお待ちください。');
+            return;
+        }
+
+        const storage = loadStorage();
+        let pool;
+
+        if (mode === 'weak') {
+            pool = allQuestions.filter(q => {
+                const rec = storage.answers[q.id];
+                return rec && rec.lastResult === 'wrong';
+            });
+            if (pool.length === 0) {
+                alert('苦手問題がありません。全問モードで練習しましょう！');
+                return;
+            }
+        } else {
+            pool = allQuestions;
+        }
+
+        quizQueue = shuffle(pool);
+        currentIdx = 0;
+        sessionCorrect = 0;
+        sessionTotal = 0;
+        answered = false;
+
+        document.getElementById('quiz-content').style.display = 'block';
+        document.getElementById('finish-content').style.display = 'none';
+        showScreen('quiz');
+        renderQuestion();
+    }
+
+    function renderQuestion() {
+        if (currentIdx >= quizQueue.length) {
+            renderFinish();
+            return;
+        }
+
+        answered = false;
+        const q = quizQueue[currentIdx];
+        const total = quizQueue.length;
+
+        document.getElementById('progress-label').textContent = `${currentIdx + 1} / ${total}`;
+        document.getElementById('progress-fill').style.width = `${(currentIdx / total) * 100}%`;
+        document.getElementById('session-pct').textContent =
+            sessionTotal > 0 ? `${pct(sessionCorrect, sessionTotal)}%` : '';
+
+        document.getElementById('q-subject').textContent = q.subject;
+        document.getElementById('q-text').innerHTML = parseBold(q.question);
+
+        const preambleEl = document.getElementById('q-preamble');
+        if (q.preamble && q.preamble.length > 0) {
+            preambleEl.innerHTML = q.preamble.map(p => `<p>${parseBold(p)}</p>`).join('');
+            preambleEl.style.display = 'block';
+        } else {
+            preambleEl.innerHTML = '';
+            preambleEl.style.display = 'none';
+        }
+
+        document.getElementById('q-choices').innerHTML = q.choices.map((c, i) => `
+            <button class="choice-btn" id="c${i + 1}" onclick="selectAnswer(${i + 1})">
+                <span class="choice-num">${i + 1}</span>
+                <span>${parseBold(c)}</span>
+            </button>
+        `).join('');
+
+        const banner = document.getElementById('result-banner');
+        banner.className = 'result-banner';
+        document.getElementById('next-btn').style.display = 'none';
+
+        window.scrollTo(0, 0);
+    }
+
+    function selectAnswer(choice) {
+        if (answered) return;
+        answered = true;
+
+        const q = quizQueue[currentIdx];
+        const correct = choice === q.answer;
+
+        sessionTotal++;
+        if (correct) sessionCorrect++;
+
+        const storage = loadStorage();
+        if (!storage.answers[q.id]) {
+            storage.answers[q.id] = { attempts: 0, correct: 0, lastResult: null };
+        }
+        storage.answers[q.id].attempts++;
+        if (correct) storage.answers[q.id].correct++;
+        storage.answers[q.id].lastResult = correct ? 'correct' : 'wrong';
+        saveStorage(storage);
+
+        for (let i = 1; i <= 4; i++) {
+            const btn = document.getElementById('c' + i);
+            if (!btn) continue;
+            btn.disabled = true;
+            if (i === q.answer) btn.classList.add('correct');
+            else if (i === choice && !correct) btn.classList.add('wrong');
+        }
+
+        const banner = document.getElementById('result-banner');
+        if (correct) {
+            banner.className = 'result-banner show correct';
+            document.getElementById('result-icon').textContent = '✓';
+            document.getElementById('result-msg').textContent = '正解！';
+        } else {
+            banner.className = 'result-banner show wrong';
+            document.getElementById('result-icon').textContent = '✗';
+            document.getElementById('result-msg').innerHTML =
+                `不正解 — 正解は <strong>${q.answer}</strong>`;
+        }
+
+        document.getElementById('session-pct').textContent =
+            `${pct(sessionCorrect, sessionTotal)}%`;
+        document.getElementById('next-btn').style.display = 'block';
+    }
+
+    function nextQuestion() {
+        currentIdx++;
+        renderQuestion();
+    }
+
+    function renderFinish() {
+        document.getElementById('quiz-content').style.display = 'none';
+        document.getElementById('finish-content').style.display = 'block';
+
+        const p = sessionTotal > 0 ? pct(sessionCorrect, sessionTotal) : 0;
+        document.getElementById('finish-emoji').textContent = p >= 80 ? '🎉' : p >= 60 ? '👍' : '📚';
+        document.getElementById('finish-score').textContent = `${p}%`;
+        document.getElementById('finish-detail').textContent =
+            `${sessionCorrect} / ${sessionTotal} 問正解`;
+
+        window.scrollTo(0, 0);
+    }
+
+    // ---------- Dashboard ----------
+
+    function showDashboard() {
+        renderDashboard();
+        showScreen('dashboard');
+    }
+
+    function renderDashboard() {
+        const storage = loadStorage();
+        const answers = storage.answers;
+
+        const totalAttempts = allQuestions.reduce((s, q) =>
+            s + (answers[q.id] ? answers[q.id].attempts : 0), 0);
+        const totalCorrect = allQuestions.reduce((s, q) =>
+            s + (answers[q.id] ? answers[q.id].correct : 0), 0);
+        const overallPct = pct(totalCorrect, totalAttempts);
+        const weakList = allQuestions.filter(q =>
+            answers[q.id] && answers[q.id].lastResult === 'wrong');
+
+        const subjects = {};
+        allQuestions.forEach(q => {
+            if (!subjects[q.subject]) subjects[q.subject] = { attempts: 0, correct: 0 };
+            const rec = answers[q.id];
+            if (rec) {
+                subjects[q.subject].attempts += rec.attempts;
+                subjects[q.subject].correct += rec.correct;
+            }
+        });
+
+        let html = '';
+
+        // Overall stats
+        html += `
+        <div class="dash-section">
+            <div class="section-label">総合</div>
+            <div class="stat-card">
+                <div class="stat-row">
+                    <span class="stat-label">総正答率</span>
+                    <span class="stat-value">${overallPct !== null ? overallPct + '%' : '—'}</span>
+                </div>
+                ${overallPct !== null ? `<div class="acc-bar"><div class="acc-fill" style="width:${overallPct}%"></div></div>` : ''}
+                <div style="margin-top:10px;font-size:13px;color:var(--text-sub)">
+                    ${totalCorrect} / ${totalAttempts} 回答
+                </div>
+            </div>
+            ${weakList.length > 0 ? `
+            <button class="btn btn-secondary" onclick="startQuiz('weak')">
+                苦手問題モードを起動（${weakList.length}問）
+            </button>` : ''}
+        </div>`;
+
+        // Per-subject accuracy
+        html += `
+        <div class="dash-section">
+            <div class="section-label">科目別正答率</div>
+            <div class="stat-card">`;
+        for (const [subject, stats] of Object.entries(subjects)) {
+            const p = pct(stats.correct, stats.attempts);
+            html += `
+            <div class="sub-item">
+                <div class="stat-row">
+                    <span class="stat-label" style="font-size:13px">${subject}</span>
+                    <span class="stat-value">${p !== null ? p + '%' : '—'}</span>
+                </div>
+                ${p !== null ? `<div class="acc-bar"><div class="acc-fill" style="width:${p}%"></div></div>` : ''}
+            </div>`;
+        }
+        html += `</div></div>`;
+
+        // Wrong questions list
+        html += `
+        <div class="dash-section">
+            <div class="section-label">間違えた問題（${weakList.length}問）</div>
+            <div class="stat-card">`;
+        if (weakList.length === 0) {
+            html += `<p class="empty-note">苦手問題はありません 🎉</p>`;
+        } else {
+            weakList.forEach(q => {
+                html += `
+                <div class="wrong-item">
+                    <div class="wrong-meta">問${q.number}｜${q.subject}</div>
+                    <div>${parseBold(q.question)}</div>
+                </div>`;
+            });
+        }
+        html += `</div></div>`;
+
+        document.getElementById('dash-body').innerHTML = html;
+    }
+
+    // ---------- Start ----------
+    init();
+</script>
+</body>
+</html>
