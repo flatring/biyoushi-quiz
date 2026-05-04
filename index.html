@@ -407,6 +407,23 @@
             padding: 8px 0;
         }
 
+        .home-group { margin-bottom: 4px; }
+
+        .home-group-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-sub);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        .home-divider {
+            height: 1px;
+            background: var(--border);
+            margin: 16px 0;
+        }
+
         /* order toggle */
         .order-toggle {
             display: flex;
@@ -443,18 +460,22 @@
     <div class="home-icon">💇</div>
     <h1 class="home-title">美容師筆記試験クイズ</h1>
     <p class="home-subtitle">第53回 過去問（55問）</p>
-    <p style="font-size:11px;color:var(--border);margin-top:-26px;margin-bottom:32px">Ver.1.1</p>
+    <p style="font-size:11px;color:var(--border);margin-top:-26px;margin-bottom:32px">Ver.1.2</p>
 
     <div class="home-card">
         <div class="home-stats" id="home-stats">
             <span style="color:var(--text-sub);font-size:14px">読み込み中…</span>
         </div>
-        <div class="order-toggle">
-            <button id="toggle-random" class="active" onclick="setOrder('random')">ランダム順</button>
-            <button id="toggle-sequential" onclick="setOrder('sequential')">番号順</button>
+        <div class="home-group">
+            <p class="home-group-label">練習する</p>
+            <div class="order-toggle">
+                <button id="toggle-random" class="active" onclick="setOrder('random')">ランダム順</button>
+                <button id="toggle-sequential" onclick="setOrder('sequential')">番号順</button>
+            </div>
+            <button class="btn btn-primary" onclick="startQuiz('all')">全問モード</button>
+            <button class="btn btn-secondary" onclick="startQuiz('weak')">苦手問題モード</button>
         </div>
-        <button class="btn btn-primary" onclick="startQuiz('all')">全問モード</button>
-        <button class="btn btn-secondary" onclick="startQuiz('weak')">苦手問題モード</button>
+        <div class="home-divider"></div>
         <button class="btn btn-outline" onclick="showDashboard()">ダッシュボード</button>
     </div>
 </div>
@@ -635,7 +656,8 @@
             pool = allQuestions;
         }
 
-        quizQueue = questionOrder === 'random' ? shuffle(pool) : [...pool].sort((a, b) => a.number - b.number);
+        const ordered = [...pool].sort((a, b) => a.number - b.number);
+        quizQueue = questionOrder === 'sequential' ? ordered : shuffle(ordered);
         currentIdx = 0;
         sessionCorrect = 0;
         sessionTotal = 0;
