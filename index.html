@@ -212,6 +212,13 @@
 
         .preamble p + p { margin-top: 6px; }
 
+        #q-image { margin-top: 14px; }
+        .q-img {
+            width: 100%;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
         .choices-list {
             display: flex;
             flex-direction: column;
@@ -407,7 +414,7 @@
 <div id="screen-home" class="screen">
     <div class="home-icon">💇</div>
     <h1 class="home-title">美容師国試クイズ</h1>
-    <p class="home-subtitle">第53回 過去問（54問）</p>
+    <p class="home-subtitle">第53回 過去問（55問）</p>
 
     <div class="home-card">
         <div class="home-stats" id="home-stats">
@@ -438,6 +445,7 @@
             <div class="question-card">
                 <p class="question-text" id="q-text"></p>
                 <div class="preamble" id="q-preamble" style="display:none"></div>
+                <div id="q-image" style="display:none"></div>
             </div>
             <div class="choices-list" id="q-choices"></div>
             <div class="result-banner" id="result-banner">
@@ -488,7 +496,7 @@
             const res = await fetch(DATA_URL);
             if (!res.ok) throw new Error('HTTP ' + res.status);
             const data = await res.json();
-            allQuestions = data.questions.filter(q => !q.hasImage);
+            allQuestions = data.questions;
             updateHomeStats();
         } catch {
             document.getElementById('home-stats').innerHTML =
@@ -624,6 +632,16 @@
         } else {
             preambleEl.innerHTML = '';
             preambleEl.style.display = 'none';
+        }
+
+        const imgEl = document.getElementById('q-image');
+        if (q.hasImage) {
+            const src = q.imagePath || `data/img/${q.id}-1.png`;
+            imgEl.innerHTML = `<img src="${src}" alt="問${q.number}の図" class="q-img">`;
+            imgEl.style.display = 'block';
+        } else {
+            imgEl.innerHTML = '';
+            imgEl.style.display = 'none';
         }
 
         document.getElementById('q-choices').innerHTML = q.choices.map((c, i) => `
