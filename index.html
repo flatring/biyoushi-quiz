@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-    <title>美容師国試クイズ｜第53回</title>
+    <title>美容師筆記試験クイズ｜第53回</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -406,6 +406,34 @@
             font-size: 14px;
             padding: 8px 0;
         }
+
+        /* order toggle */
+        .order-toggle {
+            display: flex;
+            background: var(--bg);
+            border-radius: 10px;
+            padding: 3px;
+            margin-bottom: 20px;
+        }
+
+        .order-toggle button {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            background: transparent;
+            color: var(--text-sub);
+            transition: background 0.15s, color 0.15s;
+        }
+
+        .order-toggle button.active {
+            background: var(--card);
+            color: var(--text);
+            box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+        }
     </style>
 </head>
 <body>
@@ -413,12 +441,17 @@
 <!-- HOME SCREEN -->
 <div id="screen-home" class="screen">
     <div class="home-icon">💇</div>
-    <h1 class="home-title">美容師国試クイズ</h1>
+    <h1 class="home-title">美容師筆記試験クイズ</h1>
     <p class="home-subtitle">第53回 過去問（55問）</p>
+    <p style="font-size:11px;color:var(--border);margin-top:-26px;margin-bottom:32px">Ver.1.1</p>
 
     <div class="home-card">
         <div class="home-stats" id="home-stats">
             <span style="color:var(--text-sub);font-size:14px">読み込み中…</span>
+        </div>
+        <div class="order-toggle">
+            <button id="toggle-random" class="active" onclick="setOrder('random')">ランダム順</button>
+            <button id="toggle-sequential" onclick="setOrder('sequential')">番号順</button>
         </div>
         <button class="btn btn-primary" onclick="startQuiz('all')">全問モード</button>
         <button class="btn btn-secondary" onclick="startQuiz('weak')">苦手問題モード</button>
@@ -487,6 +520,7 @@
     let sessionCorrect = 0;
     let sessionTotal = 0;
     let answered = false;
+    let questionOrder = 'random';
 
     // ---------- Bootstrap ----------
 
@@ -571,6 +605,12 @@
         updateHomeStats();
     }
 
+    function setOrder(order) {
+        questionOrder = order;
+        document.getElementById('toggle-random').classList.toggle('active', order === 'random');
+        document.getElementById('toggle-sequential').classList.toggle('active', order === 'sequential');
+    }
+
     // ---------- Quiz ----------
 
     function startQuiz(mode) {
@@ -595,7 +635,7 @@
             pool = allQuestions;
         }
 
-        quizQueue = shuffle(pool);
+        quizQueue = questionOrder === 'random' ? shuffle(pool) : [...pool].sort((a, b) => a.number - b.number);
         currentIdx = 0;
         sessionCorrect = 0;
         sessionTotal = 0;
